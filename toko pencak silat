@@ -1,0 +1,2318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Peralatan Pencak Silat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        .dark {
+            color-scheme: dark;
+        }
+        
+        /* Animasi loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #5D5CDE;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .dark .loading {
+            border-color: rgba(255, 255, 255, 0.1);
+            border-top-color: #5D5CDE;
+        }
+        
+        /* Styling untuk struk */
+        .receipt {
+            font-family: 'Courier New', monospace;
+            line-height: 1.2;
+        }
+        
+        /* Tabel dengan border */
+        .bordered-table {
+            border-collapse: collapse;
+        }
+        
+        .bordered-table th, .bordered-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem;
+        }
+        
+        .dark .bordered-table th, .dark .bordered-table td {
+            border-color: #374151;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#4F46E5',
+                    }
+                }
+            }
+        }
+        
+        // Deteksi tema gelap/terang
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <div class="flex items-center mb-4 md:mb-0">
+                <img id="storeLogo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1RDVDREUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW46InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1zaG9wcGluZy1iYWciPjxwYXRoIGQ9Ik02IDJ2MmEyIDIgMCAwIDAgMiAyaDhhMiAyIDAgMCAwIDItMlYyIi8+PHBhdGggZD0iTTMgNmgyLjE4N2E5LjA5MyA5LjA5MyAwIDAgMSAxLjQwNy0yLjYzYzEuNDYyLTEuODY5IDMuNjc0LTMuMzcgNi40MDYtMy4zNyAzLjcwOCAwIDYuNTQ1IDIuNTM5IDcuODEzIDYuMDA0IiBzdHJva2U9IiM0MzQ0REYiIC8+PHBhdGggZD0iTTIxIDZoLTIuMTg3YTkuMDkzIDkuMDkzIDAgMCAwLTEuNDA3LTIuNjMiIHN0cm9rZT0iIzQzNDREZiIgLz48cGF0aCBkPSJNNiA2aDJsMSAzYTIgMiAwIDAgMCAyIDJoNGEyIDIgMCAwIDAgMS44MzktMS4yTDE4IDciLz48cGF0aCBkPSJNMTAgMTZINWEyIDIgMCAwIDEtMi0yVjciLz48cGF0aCBkPSJNMTQgMTZoNWEyIDIgMCAwIDAgMi0yVjciLz48cGF0aCBkPSJNOSAxNyBhMiAyIDAgMSAwIDQgMCBhMiAyIDAgMSAwIC00IDAiIHN0cm9rZT0iIzQzNDREZiIgLz48cGF0aCBkPSJNMTcgMTcgYTIgMiAwIDEgMCA0IDAgYTIgMiAwIDEgMCAtNCAwIiBzdHJva2U9IiM0MzQ0REYiIC8+PC9zdmc+" alt="Logo Toko" class="w-12 h-12 mr-2">
+                <div>
+                    <h1 id="storeName" class="text-2xl font-bold text-primary">Toko Pencak Silat</h1>
+                    <p id="storeAddress" class="text-sm text-gray-600 dark:text-gray-400">Jl. Pahlawan No. 123, Kota</p>
+                </div>
+            </div>
+            <button id="settingsBtn" class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg">
+                Pengaturan
+            </button>
+        </header>
+        
+        <!-- Navigation -->
+        <nav class="mb-6 overflow-x-auto">
+            <div class="flex space-x-2 min-w-max">
+                <button class="nav-btn bg-primary text-white py-2 px-4 rounded-lg" data-target="posSec">Kasir</button>
+                <button class="nav-btn bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg" data-target="inventorySec">Stok Barang</button>
+                <button class="nav-btn bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg" data-target="reportSec">Laporan</button>
+                <button class="nav-btn bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text:gray-300 py-2 px-4 rounded-lg" data-target="employeeSec">Karyawan</button>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="mb-6">
+            <!-- POS Section -->
+            <section id="posSec" class="active-section">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Product List -->
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                        <h2 class="text-xl font-bold mb-4">Daftar Produk</h2>
+                        <div class="mb-4 flex">
+                            <input type="text" id="searchProduct" placeholder="Cari produk..." class="flex-grow border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            <select id="categoryFilter" class="ml-2 border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                                <option value="">Semua Kategori</option>
+                                <option value="Pakaian">Pakaian</option>
+                                <option value="Alat Latihan">Alat Latihan</option>
+                                <option value="Pelindung">Pelindung</option>
+                                <option value="Senjata">Senjata</option>
+                                <option value="Aksesoris">Aksesoris</option>
+                            </select>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full bordered-table">
+                                <thead class="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="text-left">Kode</th>
+                                        <th class="text-left">Nama Produk</th>
+                                        <th class="text-left">Kategori</th>
+                                        <th class="text-right">Harga</th>
+                                        <th class="text-right">Stok</th>
+                                        <th class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTableBody">
+                                    <!-- Data produk akan diisi di sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Cart -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                        <h2 class="text-xl font-bold mb-4">Keranjang Belanja</h2>
+                        <div class="mb-4 max-h-80 overflow-y-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="text-left py-2">Produk</th>
+                                        <th class="text-right py-2">Qty</th>
+                                        <th class="text-right py-2">Subtotal</th>
+                                        <th class="text-center py-2">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cartItems">
+                                    <!-- Item keranjang akan diisi di sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <div class="flex justify-between mb-2">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between mb-4">
+                                <label for="discountInput" class="flex items-center">
+                                    <span>Diskon (%):</span>
+                                </label>
+                                <input type="number" id="discountInput" min="0" max="100" value="0" 
+                                       class="w-16 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right dark:bg-gray-700 text-base">
+                            </div>
+                            <div class="flex justify-between font-bold text-lg mb-6">
+                                <span>Total:</span>
+                                <span id="totalAmount">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between mb-4">
+                                <label for="paymentAmount" class="flex items-center">
+                                    <span>Jumlah Bayar:</span>
+                                </label>
+                                <input type="number" id="paymentAmount" min="0" class="w-32 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right dark:bg-gray-700 text-base">
+                            </div>
+                            <div class="flex justify-between mb-6">
+                                <span>Kembalian:</span>
+                                <span id="changeAmount">Rp 0</span>
+                            </div>
+                            <button id="processPayment" class="w-full bg-primary hover:bg-secondary text-white py-3 px-4 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed">
+                                Proses Pembayaran
+                            </button>
+                            <button id="cancelTransaction" class="w-full mt-2 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">
+                                Batalkan Transaksi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Receipt Modal -->
+                <div id="receiptModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Struk Pembelian</h3>
+                            <button id="closeReceiptBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="printArea" class="receipt p-4 bg-white text-black rounded">
+                            <!-- Struk akan diisi di sini -->
+                        </div>
+                        <div class="flex justify-end mt-4 space-x-2">
+                            <button id="printReceiptBtn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-2 px-4 rounded-lg">
+                                Cetak Struk
+                            </button>
+                            <button id="newTransactionBtn" class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg">
+                                Transaksi Baru
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Inventory Section -->
+            <section id="inventorySec" class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Manajemen Stok Barang</h2>
+                        <button id="addProductBtn" class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg">
+                            Tambah Produk
+                        </button>
+                    </div>
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        <input type="text" id="searchInventory" placeholder="Cari produk..." class="flex-grow border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                        <select id="invCategoryFilter" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            <option value="">Semua Kategori</option>
+                            <option value="Pakaian">Pakaian</option>
+                            <option value="Alat Latihan">Alat Latihan</option>
+                            <option value="Pelindung">Pelindung</option>
+                            <option value="Senjata">Senjata</option>
+                            <option value="Aksesoris">Aksesoris</option>
+                        </select>
+                        <select id="stockFilter" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            <option value="all">Semua Stok</option>
+                            <option value="low">Stok Menipis (≤ 5)</option>
+                            <option value="out">Stok Habis</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">Kode</th>
+                                    <th class="text-left">Nama Produk</th>
+                                    <th class="text-left">Kategori</th>
+                                    <th class="text-right">Modal</th>
+                                    <th class="text-right">Harga Jual</th>
+                                    <th class="text-right">Stok</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- Data inventaris akan diisi di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Product Modal -->
+                <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 id="productModalTitle" class="text-xl font-bold">Tambah Produk</h3>
+                            <button id="closeProductBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form id="productForm" class="space-y-4">
+                            <input type="hidden" id="productId">
+                            <div>
+                                <label for="productCode" class="block mb-1">Kode Produk:</label>
+                                <input type="text" id="productCode" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div>
+                                <label for="productName" class="block mb-1">Nama Produk:</label>
+                                <input type="text" id="productName" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div>
+                                <label for="productCategory" class="block mb-1">Kategori:</label>
+                                <select id="productCategory" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Pakaian">Pakaian</option>
+                                    <option value="Alat Latihan">Alat Latihan</option>
+                                    <option value="Pelindung">Pelindung</option>
+                                    <option value="Senjata">Senjata</option>
+                                    <option value="Aksesoris">Aksesoris</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="productCost" class="block mb-1">Modal (Rp):</label>
+                                <input type="number" id="productCost" required min="0" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div>
+                                <label for="productPrice" class="block mb-1">Harga Jual (Rp):</label>
+                                <input type="number" id="productPrice" required min="0" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div>
+                                <label for="productStock" class="block mb-1">Stok:</label>
+                                <input type="number" id="productStock" required min="0" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-primary hover:bg-secondary text-white py-2 px-6 rounded-lg">
+                                    Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Stock Update Modal -->
+                <div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Update Stok</h3>
+                            <button id="closeStockBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form id="stockForm" class="space-y-4">
+                            <input type="hidden" id="stockProductId">
+                            <div>
+                                <p id="stockProductName" class="font-bold text-lg"></p>
+                                <p id="stockCurrentQty" class="text-gray-600 dark:text-gray-400"></p>
+                            </div>
+                            <div>
+                                <label for="stockUpdateType" class="block mb-1">Jenis Update:</label>
+                                <select id="stockUpdateType" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                                    <option value="add">Tambah Stok</option>
+                                    <option value="subtract">Kurangi Stok</option>
+                                    <option value="set">Set Jumlah Stok</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="stockQuantity" class="block mb-1">Jumlah:</label>
+                                <input type="number" id="stockQuantity" required min="1" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-primary hover:bg-secondary text-white py-2 px-6 rounded-lg">
+                                    Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Reports Section -->
+            <section id="reportSec" class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                    <h2 class="text-xl font-bold mb-4">Laporan Keuangan</h2>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <div>
+                            <label for="reportType" class="block mb-1">Jenis Laporan:</label>
+                            <select id="reportType" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                                <option value="sales">Penjualan</option>
+                                <option value="profit">Laba/Rugi</option>
+                                <option value="inventory">Stok Barang</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="reportPeriod" class="block mb-1">Periode:</label>
+                            <select id="reportPeriod" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                                <option value="daily">Harian</option>
+                                <option value="weekly">Mingguan</option>
+                                <option value="monthly">Bulanan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="reportStartDate" class="block mb-1">Tanggal Mulai:</label>
+                            <input type="date" id="reportStartDate" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                        </div>
+                        <div>
+                            <label for="reportEndDate" class="block mb-1">Tanggal Akhir:</label>
+                            <input type="date" id="reportEndDate" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="generateReportBtn" class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg">
+                                Tampilkan Laporan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="reportChart" class="mb-6 h-64"></div>
+                    
+                    <div id="reportContent" class="mb-4">
+                        <!-- Konten laporan akan diisi di sini -->
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button id="printReportBtn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-2 px-4 rounded-lg">
+                            Cetak Laporan
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Employee Section -->
+            <section id="employeeSec" class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Manajemen Karyawan</h2>
+                        <button id="addEmployeeBtn" class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg">
+                            Tambah Karyawan
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">ID</th>
+                                    <th class="text-left">Nama</th>
+                                    <th class="text-left">Posisi</th>
+                                    <th class="text-right">Gaji (Rp)</th>
+                                    <th class="text-center">Status Gaji</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTableBody">
+                                <!-- Data karyawan akan diisi di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Payroll Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                    <h2 class="text-xl font-bold mb-4">Penggajian Karyawan</h2>
+                    <div class="flex flex-wrap gap-4 mb-4">
+                        <div>
+                            <label for="payrollPeriod" class="block mb-1">Periode:</label>
+                            <select id="payrollPeriod" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                                <option value="weekly">Mingguan</option>
+                                <option value="monthly">Bulanan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="payrollDate" class="block mb-1">Tanggal Gajian:</label>
+                            <input type="date" id="payrollDate" class="border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="processPayrollBtn" class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg">
+                                Proses Gajian
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">Tanggal</th>
+                                    <th class="text-left">Periode</th>
+                                    <th class="text-right">Total Gaji (Rp)</th>
+                                    <th class="text-right">Jumlah Karyawan</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payrollHistoryTableBody">
+                                <!-- Riwayat penggajian akan diisi di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Employee Modal -->
+                <div id="employeeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 id="employeeModalTitle" class="text-xl font-bold">Tambah Karyawan</h3>
+                            <button id="closeEmployeeBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form id="employeeForm" class="space-y-4">
+                            <input type="hidden" id="employeeId">
+                            <div>
+                                <label for="employeeName" class="block mb-1">Nama Karyawan:</label>
+                                <input type="text" id="employeeName" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div>
+                                <label for="employeePosition" class="block mb-1">Posisi:</label>
+                                <input type="text" id="employeePosition" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div>
+                                <label for="employeeSalary" class="block mb-1">Gaji (Rp):</label>
+                                <input type="number" id="employeeSalary" required min="0" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                            </div>
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-primary hover:bg-secondary text-white py-2 px-6 rounded-lg">
+                                    Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Payroll Detail Modal -->
+                <div id="payrollDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-3xl w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Detail Penggajian</h3>
+                            <button id="closePayrollDetailBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="payrollDetailContent">
+                            <!-- Detail penggajian akan diisi di sini -->
+                        </div>
+                        <div class="flex justify-end mt-4">
+                            <button id="printPayrollDetailBtn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-2 px-4 rounded-lg">
+                                Cetak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Pengaturan Toko</h3>
+                    <button id="closeSettingsBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="settingsForm" class="space-y-4">
+                    <div>
+                        <label for="storeNameInput" class="block mb-1">Nama Toko:</label>
+                        <input type="text" id="storeNameInput" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base">
+                    </div>
+                    <div>
+                        <label for="storeAddressInput" class="block mb-1">Alamat Toko:</label>
+                        <textarea id="storeAddressInput" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 dark:bg-gray-700 text-base"></textarea>
+                    </div>
+                    <div>
+                        <label for="storeLogoInput" class="block mb-1">Logo Toko:</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="file" id="storeLogoInput" accept="image/*" class="hidden">
+                            <button type="button" id="storeLogoBtn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-2 px-4 rounded-lg">
+                                Pilih File
+                            </button>
+                            <span id="storeLogoName" class="text-sm text-gray-600 dark:text-gray-400">Tidak ada file dipilih</span>
+                        </div>
+                        <div class="mt-2">
+                            <img id="storeLogoPreview" src="" alt="Preview Logo" class="hidden max-h-24">
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="bg-primary hover:bg-secondary text-white py-2 px-6 rounded-lg">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Data Store (in-memory)
+        const appData = {
+            store: {
+                name: "Toko Pencak Silat",
+                address: "Jl. Pahlawan No. 123, Kota",
+                logo: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1RDVDREUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1zaG9wcGluZy1iYWciPjxwYXRoIGQ9Ik02IDJ2MmEyIDIgMCAwIDAgMiAyaDhhMiAyIDAgMCAwIDItMlYyIi8+PHBhdGggZD0iTTMgNmgyLjE4N2E5LjA5MyA5LjA5MyAwIDAgMSAxLjQwNy0yLjYzYzEuNDYyLTEuODY5IDMuNjc0LTMuMzcgNi40MDYtMy4zNyAzLjcwOCAwIDYuNTQ1IDIuNTM5IDcuODEzIDYuMDA0IiBzdHJva2U9IiM0MzQ0REYiIC8+PHBhdGggZD0iTTIxIDZoLTIuMTg3YTkuMDkzIDkuMDkzIDAgMCAwLTEuNDA3LTIuNjMiIHN0cm9rZT0iIzQzNDREZiIgLz48cGF0aCBkPSJNNiA2aDJsMSAzYTIgMiAwIDAgMCAyIDJoNGEyIDIgMCAwIDAgMS44MzktMS4yTDE4IDciLz48cGF0aCBkPSJNMTAgMTZINWEyIDIgMCAwIDEtMi0yVjciLz48cGF0aCBkPSJNMTQgMTZoNWEyIDIgMCAwIDAgMi0yVjciLz48cGF0aCBkPSJNOSAxNyBhMiAyIDAgMSAwIDQgMCBhMiAyIDAgMSAwIC00IDAiIHN0cm9rZT0iIzQzNDREZiIgLz48cGF0aCBkPSJNMTcgMTcgYTIgMiAwIDEgMCA0IDAgYTIgMiAwIDEgMCAtNCAwIiBzdHJva2U9IiM0MzQ0REYiIC8+PC9zdmc+"
+            },
+            products: [
+                { id: 1, code: "PS001", name: "Baju Silat", category: "Pakaian", cost: 80000, price: 120000, stock: 25 },
+                { id: 2, code: "PS002", name: "Celana Silat", category: "Pakaian", cost: 60000, price: 90000, stock: 30 },
+                { id: 3, code: "PS003", name: "Sabuk Silat", category: "Pakaian", cost: 30000, price: 50000, stock: 40 },
+                { id: 4, code: "PS004", name: "Golok Latihan", category: "Senjata", cost: 150000, price: 250000, stock: 15 },
+                { id: 5, code: "PS005", name: "Tongkat Rotan", category: "Senjata", cost: 45000, price: 75000, stock: 20 },
+                { id: 6, code: "PS006", name: "Target Tendangan", category: "Alat Latihan", cost: 200000, price: 350000, stock: 8 },
+                { id: 7, code: "PS007", name: "Samsak", category: "Alat Latihan", cost: 350000, price: 550000, stock: 5 },
+                { id: 8, code: "PS008", name: "Pelindung Dada", category: "Pelindung", cost: 120000, price: 200000, stock: 12 },
+                { id: 9, code: "PS009", name: "Pelindung Kaki", category: "Pelindung", cost: 80000, price: 150000, stock: 18 },
+                { id: 10, code: "PS010", name: "Sarung Tangan", category: "Pelindung", cost: 65000, price: 110000, stock: 22 }
+            ],
+            cart: [],
+            transactions: [],
+            employees: [
+                { id: 1, name: "Ahmad Sulaiman", position: "Kasir", salary: 3000000, paymentStatus: "pending" },
+                { id: 2, name: "Ratna Dewi", position: "Asisten Manager", salary: 4500000, paymentStatus: "pending" }
+            ],
+            payrollHistory: []
+        };
+        
+        // Utility Functions
+        function formatCurrency(amount) {
+            return "Rp " + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
+        function generateID(array) {
+            return array.length > 0 ? Math.max(...array.map(item => item.id)) + 1 : 1;
+        }
+        
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date for date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reportStartDate').value = today;
+            document.getElementById('reportEndDate').value = today;
+            document.getElementById('payrollDate').value = today;
+            
+            // Initialize store info
+            updateStoreInfo();
+            
+            // Load initial data
+            loadProducts();
+            loadInventory();
+            loadEmployees();
+            loadPayrollHistory();
+            
+            // Setup event listeners
+            setupNavigation();
+            setupPOS();
+            setupInventory();
+            setupReports();
+            setupEmployees();
+            setupSettings();
+        });
+        
+        // Update Store Info
+        function updateStoreInfo() {
+            document.getElementById('storeName').textContent = appData.store.name;
+            document.getElementById('storeAddress').textContent = appData.store.address;
+            document.getElementById('storeLogo').src = appData.store.logo;
+        }
+        
+        // Navigation
+        function setupNavigation() {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    
+                    // Hide all sections
+                    document.querySelectorAll('main > section').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+                    
+                    // Show target section
+                    document.getElementById(targetId).classList.remove('hidden');
+                    
+                    // Update button styles
+                    navButtons.forEach(btn => {
+                        btn.classList.remove('bg-primary', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-300');
+                    });
+                    
+                    this.classList.remove('bg-gray-200', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-300');
+                    this.classList.add('bg-primary', 'text-white');
+                });
+            });
+        }
+        
+        // POS Section
+        function setupPOS() {
+            const searchProduct = document.getElementById('searchProduct');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const discountInput = document.getElementById('discountInput');
+            const paymentAmount = document.getElementById('paymentAmount');
+            const processPayment = document.getElementById('processPayment');
+            const cancelTransaction = document.getElementById('cancelTransaction');
+            const closeReceiptBtn = document.getElementById('closeReceiptBtn');
+            const printReceiptBtn = document.getElementById('printReceiptBtn');
+            const newTransactionBtn = document.getElementById('newTransactionBtn');
+            
+            // Search and filter products
+            searchProduct.addEventListener('input', function() {
+                loadProducts();
+            });
+            
+            categoryFilter.addEventListener('change', function() {
+                loadProducts();
+            });
+            
+            // Update totals when discount changes
+            discountInput.addEventListener('input', function() {
+                updateCartTotals();
+            });
+            
+            // Calculate change when payment amount changes
+            paymentAmount.addEventListener('input', function() {
+                const total = calculateTotal();
+                const payment = parseFloat(this.value) || 0;
+                const change = payment - total;
+                
+                document.getElementById('changeAmount').textContent = change >= 0 ? formatCurrency(change) : "Rp 0";
+                
+                // Enable/disable payment button
+                processPayment.disabled = payment < total || appData.cart.length === 0;
+            });
+            
+            // Process payment
+            processPayment.addEventListener('click', function() {
+                const total = calculateTotal();
+                const payment = parseFloat(paymentAmount.value) || 0;
+                
+                if (payment < total || appData.cart.length === 0) return;
+                
+                // Create transaction record
+                const transaction = {
+                    id: generateID(appData.transactions),
+                    date: new Date(),
+                    items: JSON.parse(JSON.stringify(appData.cart)),
+                    subtotal: calculateSubtotal(),
+                    discount: parseFloat(discountInput.value) || 0,
+                    total: total,
+                    payment: payment,
+                    change: payment - total
+                };
+                
+                // Calculate profit for this transaction
+                transaction.profit = transaction.items.reduce((sum, item) => {
+                    const product = appData.products.find(p => p.id === item.id);
+                    return sum + ((item.price - product.cost) * item.quantity);
+                }, 0);
+                
+                // Add to transactions
+                appData.transactions.push(transaction);
+                
+                // Update inventory
+                transaction.items.forEach(item => {
+                    const product = appData.products.find(p => p.id === item.id);
+                    if (product) {
+                        product.stock -= item.quantity;
+                    }
+                });
+                
+                // Generate receipt
+                generateReceipt(transaction);
+                
+                // Show receipt modal
+                document.getElementById('receiptModal').classList.remove('hidden');
+            });
+            
+            // Cancel transaction
+            cancelTransaction.addEventListener('click', function() {
+                if (confirm('Apakah Anda yakin ingin membatalkan transaksi ini?')) {
+                    appData.cart = [];
+                    updateCart();
+                    updateCartTotals();
+                    paymentAmount.value = '';
+                    document.getElementById('changeAmount').textContent = 'Rp 0';
+                }
+            });
+            
+            // Close receipt modal
+            closeReceiptBtn.addEventListener('click', function() {
+                document.getElementById('receiptModal').classList.add('hidden');
+            });
+            
+            // Print receipt
+            printReceiptBtn.addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Start new transaction
+            newTransactionBtn.addEventListener('click', function() {
+                document.getElementById('receiptModal').classList.add('hidden');
+                appData.cart = [];
+                updateCart();
+                updateCartTotals();
+                paymentAmount.value = '';
+                document.getElementById('changeAmount').textContent = 'Rp 0';
+                discountInput.value = 0;
+            });
+        }
+        
+        // Load Products
+        function loadProducts() {
+            const tableBody = document.getElementById('productTableBody');
+            const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            // Filter products
+            const filteredProducts = appData.products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                     product.code.toLowerCase().includes(searchTerm);
+                const matchesCategory = categoryFilter === '' || product.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Add products to table
+            filteredProducts.forEach(product => {
+                const row = document.createElement('tr');
+                row.className = product.stock <= 0 ? 'bg-red-100 dark:bg-red-900/20' : 
+                               (product.stock <= 5 ? 'bg-yellow-100 dark:bg-yellow-900/20' : '');
+                
+                row.innerHTML = `
+                    <td class="py-2">${product.code}</td>
+                    <td class="py-2">${product.name}</td>
+                    <td class="py-2">${product.category}</td>
+                    <td class="py-2 text-right">${formatCurrency(product.price)}</td>
+                    <td class="py-2 text-right">${product.stock}</td>
+                    <td class="py-2 text-center">
+                        <button class="add-to-cart bg-primary hover:bg-secondary text-white py-1 px-3 rounded-lg text-sm ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${product.stock <= 0 ? 'disabled' : ''}>
+                            Tambah
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                
+                // Add to cart event
+                const addButton = row.querySelector('.add-to-cart');
+                addButton.addEventListener('click', function() {
+                    addToCart(product);
+                });
+            });
+        }
+        
+        // Add to Cart
+        function addToCart(product) {
+            // Check if product is already in cart
+            const existingItemIndex = appData.cart.findIndex(item => item.id === product.id);
+            
+            if (existingItemIndex !== -1) {
+                // Check stock
+                if (appData.cart[existingItemIndex].quantity >= product.stock) {
+                    alert('Stok tidak mencukupi!');
+                    return;
+                }
+                
+                // Increment quantity
+                appData.cart[existingItemIndex].quantity += 1;
+            } else {
+                // Add new item
+                appData.cart.push({
+                    id: product.id,
+                    code: product.code,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+            updateCartTotals();
+        }
+        
+        // Update Cart
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            
+            // Clear cart
+            cartItems.innerHTML = '';
+            
+            // Add items to cart
+            appData.cart.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td class="py-2">
+                        <div class="font-medium">${item.name}</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">${item.code}</div>
+                    </td>
+                    <td class="py-2 text-right">
+                        <div class="flex items-center justify-end">
+                            <button class="decrement-qty bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white w-6 h-6 flex items-center justify-center rounded">-</button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button class="increment-qty bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white w-6 h-6 flex items-center justify-center rounded">+</button>
+                        </div>
+                    </td>
+                    <td class="py-2 text-right">${formatCurrency(item.price * item.quantity)}</td>
+                    <td class="py-2 text-center">
+                        <button class="remove-item text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                
+                cartItems.appendChild(row);
+                
+                // Decrement quantity
+                const decrementBtn = row.querySelector('.decrement-qty');
+                decrementBtn.addEventListener('click', function() {
+                    if (item.quantity > 1) {
+                        item.quantity -= 1;
+                    } else {
+                        appData.cart.splice(index, 1);
+                    }
+                    updateCart();
+                    updateCartTotals();
+                });
+                
+                // Increment quantity
+                const incrementBtn = row.querySelector('.increment-qty');
+                incrementBtn.addEventListener('click', function() {
+                    const product = appData.products.find(p => p.id === item.id);
+                    if (item.quantity < product.stock) {
+                        item.quantity += 1;
+                        updateCart();
+                        updateCartTotals();
+                    } else {
+                        alert('Stok tidak mencukupi!');
+                    }
+                });
+                
+                // Remove item
+                const removeBtn = row.querySelector('.remove-item');
+                removeBtn.addEventListener('click', function() {
+                    appData.cart.splice(index, 1);
+                    updateCart();
+                    updateCartTotals();
+                });
+            });
+        }
+        
+        // Calculate Subtotal
+        function calculateSubtotal() {
+            return appData.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+        
+        // Calculate Total (after discount)
+        function calculateTotal() {
+            const subtotal = calculateSubtotal();
+            const discountPercent = parseFloat(document.getElementById('discountInput').value) || 0;
+            const discountAmount = subtotal * (discountPercent / 100);
+            return subtotal - discountAmount;
+        }
+        
+        // Update Cart Totals
+        function updateCartTotals() {
+            const subtotal = calculateSubtotal();
+            const total = calculateTotal();
+            
+            document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('totalAmount').textContent = formatCurrency(total);
+            
+            // Update change
+            const payment = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            const change = payment - total;
+            document.getElementById('changeAmount').textContent = change >= 0 ? formatCurrency(change) : "Rp 0";
+            
+            // Enable/disable payment button
+            document.getElementById('processPayment').disabled = payment < total || appData.cart.length === 0;
+        }
+        
+        // Generate Receipt
+        function generateReceipt(transaction) {
+            const printArea = document.getElementById('printArea');
+            
+            const receiptDate = new Date(transaction.date).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Create receipt content
+            let receiptContent = `
+                <div class="flex justify-center mb-2">
+                    <img src="${appData.store.logo}" alt="Logo Toko" class="w-16 h-16">
+                </div>
+                <div class="text-center mb-4">
+                    <div class="font-bold text-lg">${appData.store.name}</div>
+                    <div class="text-sm">${appData.store.address}</div>
+                    <div class="text-sm mt-1">Tanggal: ${receiptDate}</div>
+                    <div class="text-sm">No. Transaksi: #${transaction.id.toString().padStart(4, '0')}</div>
+                </div>
+                <div class="border-t border-b border-black my-2 py-2">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-left font-bold">Item</th>
+                                <th class="text-right font-bold">Qty</th>
+                                <th class="text-right font-bold">Harga</th>
+                                <th class="text-right font-bold">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Add items
+            transaction.items.forEach(item => {
+                receiptContent += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td class="text-right">${item.quantity}</td>
+                        <td class="text-right">${formatCurrency(item.price)}</td>
+                        <td class="text-right">${formatCurrency(item.price * item.quantity)}</td>
+                    </tr>
+                `;
+            });
+            
+            // Add totals
+            receiptContent += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-right">
+                    <div class="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>${formatCurrency(transaction.subtotal)}</span>
+                    </div>
+            `;
+            
+            // Add discount if applied
+            if (transaction.discount > 0) {
+                receiptContent += `
+                    <div class="flex justify-between">
+                        <span>Diskon (${transaction.discount}%):</span>
+                        <span>-${formatCurrency(transaction.subtotal * (transaction.discount / 100))}</span>
+                    </div>
+                `;
+            }
+            
+            // Add final totals
+            receiptContent += `
+                    <div class="flex justify-between font-bold mt-1">
+                        <span>Total:</span>
+                        <span>${formatCurrency(transaction.total)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tunai:</span>
+                        <span>${formatCurrency(transaction.payment)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Kembalian:</span>
+                        <span>${formatCurrency(transaction.change)}</span>
+                    </div>
+                </div>
+                <div class="text-center mt-6 text-sm">
+                    <p>Terima Kasih Atas Kunjungan Anda</p>
+                </div>
+            `;
+            
+            printArea.innerHTML = receiptContent;
+        }
+        
+        // Inventory Section
+        function setupInventory() {
+            const searchInventory = document.getElementById('searchInventory');
+            const invCategoryFilter = document.getElementById('invCategoryFilter');
+            const stockFilter = document.getElementById('stockFilter');
+            const addProductBtn = document.getElementById('addProductBtn');
+            const productForm = document.getElementById('productForm');
+            const closeProductBtn = document.getElementById('closeProductBtn');
+            const stockForm = document.getElementById('stockForm');
+            const closeStockBtn = document.getElementById('closeStockBtn');
+            
+            // Search and filter inventory
+            searchInventory.addEventListener('input', function() {
+                loadInventory();
+            });
+            
+            invCategoryFilter.addEventListener('change', function() {
+                loadInventory();
+            });
+            
+            stockFilter.addEventListener('change', function() {
+                loadInventory();
+            });
+            
+            // Add product button
+            addProductBtn.addEventListener('click', function() {
+                // Reset form
+                productForm.reset();
+                document.getElementById('productId').value = '';
+                document.getElementById('productModalTitle').textContent = 'Tambah Produk';
+                
+                // Show modal
+                document.getElementById('productModal').classList.remove('hidden');
+            });
+            
+            // Close product modal
+            closeProductBtn.addEventListener('click', function() {
+                document.getElementById('productModal').classList.add('hidden');
+            });
+            
+            // Submit product form
+            productForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const productId = document.getElementById('productId').value;
+                const code = document.getElementById('productCode').value;
+                const name = document.getElementById('productName').value;
+                const category = document.getElementById('productCategory').value;
+                const cost = parseFloat(document.getElementById('productCost').value);
+                const price = parseFloat(document.getElementById('productPrice').value);
+                const stock = parseInt(document.getElementById('productStock').value);
+                
+                // Validate code uniqueness
+                const existingProduct = appData.products.find(p => p.code === code && (!productId || p.id != productId));
+                if (existingProduct) {
+                    alert('Kode produk sudah digunakan. Silakan gunakan kode lain.');
+                    return;
+                }
+                
+                if (productId) {
+                    // Update existing product
+                    const index = appData.products.findIndex(p => p.id == productId);
+                    if (index !== -1) {
+                        appData.products[index] = {
+                            id: parseInt(productId),
+                            code,
+                            name,
+                            category,
+                            cost,
+                            price,
+                            stock
+                        };
+                    }
+                } else {
+                    // Add new product
+                    appData.products.push({
+                        id: generateID(appData.products),
+                        code,
+                        name,
+                        category,
+                        cost,
+                        price,
+                        stock
+                    });
+                }
+                
+                // Close modal
+                document.getElementById('productModal').classList.add('hidden');
+                
+                // Refresh inventory
+                loadInventory();
+                loadProducts();
+            });
+            
+            // Close stock modal
+            closeStockBtn.addEventListener('click', function() {
+                document.getElementById('stockModal').classList.add('hidden');
+            });
+            
+            // Submit stock form
+            stockForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const productId = document.getElementById('stockProductId').value;
+                const updateType = document.getElementById('stockUpdateType').value;
+                const quantity = parseInt(document.getElementById('stockQuantity').value);
+                
+                const product = appData.products.find(p => p.id == productId);
+                if (!product) return;
+                
+                switch (updateType) {
+                    case 'add':
+                        product.stock += quantity;
+                        break;
+                    case 'subtract':
+                        if (product.stock < quantity) {
+                            alert('Stok tidak mencukupi untuk pengurangan!');
+                            return;
+                        }
+                        product.stock -= quantity;
+                        break;
+                    case 'set':
+                        product.stock = quantity;
+                        break;
+                }
+                
+                // Close modal
+                document.getElementById('stockModal').classList.add('hidden');
+                
+                // Refresh inventory
+                loadInventory();
+                loadProducts();
+            });
+        }
+        
+        // Load Inventory
+        function loadInventory() {
+            const tableBody = document.getElementById('inventoryTableBody');
+            const searchTerm = document.getElementById('searchInventory').value.toLowerCase();
+            const categoryFilter = document.getElementById('invCategoryFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
+            
+            // Filter products
+            const filteredProducts = appData.products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                     product.code.toLowerCase().includes(searchTerm);
+                const matchesCategory = categoryFilter === '' || product.category === categoryFilter;
+                
+                let matchesStock = true;
+                if (stockFilter === 'low') {
+                    matchesStock = product.stock <= 5 && product.stock > 0;
+                } else if (stockFilter === 'out') {
+                    matchesStock = product.stock <= 0;
+                }
+                
+                return matchesSearch && matchesCategory && matchesStock;
+            });
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Add products to table
+            filteredProducts.forEach(product => {
+                const row = document.createElement('tr');
+                row.className = product.stock <= 0 ? 'bg-red-100 dark:bg-red-900/20' : 
+                               (product.stock <= 5 ? 'bg-yellow-100 dark:bg-yellow-900/20' : '');
+                
+                row.innerHTML = `
+                    <td class="py-2">${product.code}</td>
+                    <td class="py-2">${product.name}</td>
+                    <td class="py-2">${product.category}</td>
+                    <td class="py-2 text-right">${formatCurrency(product.cost)}</td>
+                    <td class="py-2 text-right">${formatCurrency(product.price)}</td>
+                    <td class="py-2 text-right">${product.stock}</td>
+                    <td class="py-2 text-center">
+                        <div class="flex justify-center space-x-1">
+                            <button class="edit-product bg-primary hover:bg-secondary text-white py-1 px-2 rounded-lg text-sm">
+                                Edit
+                            </button>
+                            <button class="update-stock bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-lg text-sm">
+                                Stok
+                            </button>
+                            <button class="delete-product bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-lg text-sm">
+                                Hapus
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                
+                // Edit product event
+                const editButton = row.querySelector('.edit-product');
+                editButton.addEventListener('click', function() {
+                    // Fill form with product data
+                    document.getElementById('productId').value = product.id;
+                    document.getElementById('productCode').value = product.code;
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productCategory').value = product.category;
+                    document.getElementById('productCost').value = product.cost;
+                    document.getElementById('productPrice').value = product.price;
+                    document.getElementById('productStock').value = product.stock;
+                    
+                    // Update modal title
+                    document.getElementById('productModalTitle').textContent = 'Edit Produk';
+                    
+                    // Show modal
+                    document.getElementById('productModal').classList.remove('hidden');
+                });
+                
+                // Update stock event
+                const stockButton = row.querySelector('.update-stock');
+                stockButton.addEventListener('click', function() {
+                    // Fill form with product data
+                    document.getElementById('stockProductId').value = product.id;
+                    document.getElementById('stockProductName').textContent = product.name;
+                    document.getElementById('stockCurrentQty').textContent = `Stok Saat Ini: ${product.stock}`;
+                    document.getElementById('stockUpdateType').value = 'add';
+                    document.getElementById('stockQuantity').value = 1;
+                    
+                    // Show modal
+                    document.getElementById('stockModal').classList.remove('hidden');
+                });
+                
+                // Delete product event
+                const deleteButton = row.querySelector('.delete-product');
+                deleteButton.addEventListener('click', function() {
+                    if (confirm(`Apakah Anda yakin ingin menghapus produk ${product.name}?`)) {
+                        const index = appData.products.findIndex(p => p.id === product.id);
+                        if (index !== -1) {
+                            appData.products.splice(index, 1);
+                            loadInventory();
+                            loadProducts();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Reports Section
+        function setupReports() {
+            const reportType = document.getElementById('reportType');
+            const reportPeriod = document.getElementById('reportPeriod');
+            const reportStartDate = document.getElementById('reportStartDate');
+            const reportEndDate = document.getElementById('reportEndDate');
+            const generateReportBtn = document.getElementById('generateReportBtn');
+            const printReportBtn = document.getElementById('printReportBtn');
+            
+            // Generate report
+            generateReportBtn.addEventListener('click', function() {
+                const type = reportType.value;
+                const period = reportPeriod.value;
+                const startDate = new Date(reportStartDate.value);
+                startDate.setHours(0, 0, 0, 0);
+                
+                const endDate = new Date(reportEndDate.value);
+                endDate.setHours(23, 59, 59, 999);
+                
+                generateReport(type, period, startDate, endDate);
+            });
+            
+            // Print report
+            printReportBtn.addEventListener('click', function() {
+                window.print();
+            });
+        }
+        
+        // Generate Report
+        function generateReport(type, period, startDate, endDate) {
+            const reportContent = document.getElementById('reportContent');
+            
+            // Filter transactions by date range
+            const filteredTransactions = appData.transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date);
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+            
+            // Sort transactions by date
+            filteredTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            switch (type) {
+                case 'sales':
+                    generateSalesReport(filteredTransactions, period, startDate, endDate);
+                    break;
+                case 'profit':
+                    generateProfitReport(filteredTransactions, period, startDate, endDate);
+                    break;
+                case 'inventory':
+                    generateInventoryReport();
+                    break;
+            }
+        }
+        
+        // Generate Sales Report
+        function generateSalesReport(transactions, period, startDate, endDate) {
+            const reportContent = document.getElementById('reportContent');
+            const chartContainer = document.getElementById('reportChart');
+            
+            // Format date range
+            const startDateStr = formatDate(startDate);
+            const endDateStr = formatDate(endDate);
+            
+            // Group transactions by period
+            const groupedData = groupTransactionsByPeriod(transactions, period);
+            
+            // Create content
+            let content = `
+                <div id="printArea">
+                    <h3 class="text-xl font-bold mb-2">Laporan Penjualan</h3>
+                    <p class="mb-4">Periode: ${startDateStr} - ${endDateStr}</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">Periode</th>
+                                    <th class="text-right">Jumlah Transaksi</th>
+                                    <th class="text-right">Total Penjualan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Add summary rows
+            let totalSales = 0;
+            let totalTransactions = 0;
+            
+            Object.entries(groupedData).forEach(([periodLabel, periodData]) => {
+                const periodTotalSales = periodData.reduce((sum, t) => sum + t.total, 0);
+                totalSales += periodTotalSales;
+                totalTransactions += periodData.length;
+                
+                content += `
+                    <tr>
+                        <td>${periodLabel}</td>
+                        <td class="text-right">${periodData.length}</td>
+                        <td class="text-right">${formatCurrency(periodTotalSales)}</td>
+                    </tr>
+                `;
+            });
+            
+            // Add total row
+            content += `
+                            </tbody>
+                            <tfoot class="font-bold">
+                                <tr>
+                                    <td>Total</td>
+                                    <td class="text-right">${totalTransactions}</td>
+                                    <td class="text-right">${formatCurrency(totalSales)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <h4 class="text-lg font-bold mt-6 mb-2">Detail Transaksi</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">No</th>
+                                    <th class="text-left">Tanggal</th>
+                                    <th class="text-left">Items</th>
+                                    <th class="text-right">Subtotal</th>
+                                    <th class="text-right">Diskon</th>
+                                    <th class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Add transaction rows
+            transactions.forEach((transaction, index) => {
+                const transactionDate = new Date(transaction.date).toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const itemsText = transaction.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                const discountAmount = transaction.subtotal * (transaction.discount / 100);
+                
+                content += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${transactionDate}</td>
+                        <td>${itemsText}</td>
+                        <td class="text-right">${formatCurrency(transaction.subtotal)}</td>
+                        <td class="text-right">${transaction.discount > 0 ? formatCurrency(discountAmount) : '-'}</td>
+                        <td class="text-right">${formatCurrency(transaction.total)}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            reportContent.innerHTML = content;
+            
+            // Create chart data
+            const chartLabels = Object.keys(groupedData);
+            const chartData = Object.values(groupedData).map(periodData => 
+                periodData.reduce((sum, t) => sum + t.total, 0)
+            );
+            
+            // Create chart
+            createChart(chartContainer, 'Penjualan', chartLabels, chartData);
+        }
+        
+        // Generate Profit Report
+        function generateProfitReport(transactions, period, startDate, endDate) {
+            const reportContent = document.getElementById('reportContent');
+            const chartContainer = document.getElementById('reportChart');
+            
+            // Format date range
+            const startDateStr = formatDate(startDate);
+            const endDateStr = formatDate(endDate);
+            
+            // Group transactions by period
+            const groupedData = groupTransactionsByPeriod(transactions, period);
+            
+            // Get payroll expenses in date range
+            const payrollExpenses = appData.payrollHistory.filter(payroll => {
+                const payrollDate = new Date(payroll.date);
+                return payrollDate >= startDate && payrollDate <= endDate;
+            });
+            
+            // Group payroll by period
+            const groupedPayroll = groupPayrollByPeriod(payrollExpenses, period);
+            
+            // Create content
+            let content = `
+                <div id="printArea">
+                    <h3 class="text-xl font-bold mb-2">Laporan Laba/Rugi</h3>
+                    <p class="mb-4">Periode: ${startDateStr} - ${endDateStr}</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">Periode</th>
+                                    <th class="text-right">Penjualan</th>
+                                    <th class="text-right">Modal Produk</th>
+                                    <th class="text-right">Gaji Karyawan</th>
+                                    <th class="text-right">Laba/Rugi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Add summary rows
+            let totalSales = 0;
+            let totalCost = 0;
+            let totalPayroll = 0;
+            let totalProfit = 0;
+            
+            // Chart data
+            const chartLabels = [];
+            const salesData = [];
+            const expensesData = [];
+            const profitData = [];
+            
+            Object.entries(groupedData).forEach(([periodLabel, periodData]) => {
+                // Calculate sales
+                const periodTotalSales = periodData.reduce((sum, t) => sum + t.total, 0);
+                
+                // Calculate cost of goods sold
+                const periodCost = periodData.reduce((sum, t) => {
+                    return sum + t.items.reduce((itemSum, item) => {
+                        const product = appData.products.find(p => p.id === item.id);
+                        return itemSum + (product ? product.cost * item.quantity : 0);
+                    }, 0);
+                }, 0);
+                
+                // Get payroll for this period
+                const periodPayroll = groupedPayroll[periodLabel] ? 
+                    groupedPayroll[periodLabel].reduce((sum, p) => sum + p.totalAmount, 0) : 0;
+                
+                // Calculate profit
+                const periodProfit = periodTotalSales - periodCost - periodPayroll;
+                
+                // Add to totals
+                totalSales += periodTotalSales;
+                totalCost += periodCost;
+                totalPayroll += periodPayroll;
+                totalProfit += periodProfit;
+                
+                // Add to chart data
+                chartLabels.push(periodLabel);
+                salesData.push(periodTotalSales);
+                expensesData.push(periodCost + periodPayroll);
+                profitData.push(periodProfit);
+                
+                content += `
+                    <tr>
+                        <td>${periodLabel}</td>
+                        <td class="text-right">${formatCurrency(periodTotalSales)}</td>
+                        <td class="text-right">${formatCurrency(periodCost)}</td>
+                        <td class="text-right">${formatCurrency(periodPayroll)}</td>
+                        <td class="text-right ${periodProfit < 0 ? 'text-red-500' : 'text-green-500'}">${formatCurrency(periodProfit)}</td>
+                    </tr>
+                `;
+            });
+            
+            // Add total row
+            content += `
+                            </tbody>
+                            <tfoot class="font-bold">
+                                <tr>
+                                    <td>Total</td>
+                                    <td class="text-right">${formatCurrency(totalSales)}</td>
+                                    <td class="text-right">${formatCurrency(totalCost)}</td>
+                                    <td class="text-right">${formatCurrency(totalPayroll)}</td>
+                                    <td class="text-right ${totalProfit < 0 ? 'text-red-500' : 'text-green-500'}">${formatCurrency(totalProfit)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            reportContent.innerHTML = content;
+            
+            // Create multi-data chart
+            createMultiDataChart(chartContainer, chartLabels, 
+                [
+                    { label: 'Penjualan', data: salesData, backgroundColor: 'rgba(93, 92, 222, 0.5)' },
+                    { label: 'Biaya', data: expensesData, backgroundColor: 'rgba(239, 68, 68, 0.5)' },
+                    { label: 'Laba/Rugi', data: profitData, backgroundColor: 'rgba(34, 197, 94, 0.5)' }
+                ]
+            );
+        }
+        
+        // Generate Inventory Report
+        function generateInventoryReport() {
+            const reportContent = document.getElementById('reportContent');
+            const chartContainer = document.getElementById('reportChart');
+            
+            // Group products by category
+            const categorySummary = {};
+            const lowStockProducts = [];
+            let totalValue = 0;
+            
+            appData.products.forEach(product => {
+                // Add to category summary
+                if (!categorySummary[product.category]) {
+                    categorySummary[product.category] = {
+                        count: 0,
+                        stock: 0,
+                        value: 0
+                    };
+                }
+                
+                categorySummary[product.category].count++;
+                categorySummary[product.category].stock += product.stock;
+                categorySummary[product.category].value += product.stock * product.cost;
+                
+                // Add to total value
+                totalValue += product.stock * product.cost;
+                
+                // Check for low stock
+                if (product.stock <= 5) {
+                    lowStockProducts.push(product);
+                }
+            });
+            
+            // Create content
+            let content = `
+                <div id="printArea">
+                    <h3 class="text-xl font-bold mb-2">Laporan Stok Barang</h3>
+                    <p class="mb-4">Total Nilai Inventory: ${formatCurrency(totalValue)}</p>
+                    
+                    <h4 class="text-lg font-bold mb-2">Ringkasan Kategori</h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">Kategori</th>
+                                    <th class="text-right">Jumlah Produk</th>
+                                    <th class="text-right">Total Stok</th>
+                                    <th class="text-right">Nilai Inventory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Add category rows
+            Object.entries(categorySummary).forEach(([category, data]) => {
+                content += `
+                    <tr>
+                        <td>${category}</td>
+                        <td class="text-right">${data.count}</td>
+                        <td class="text-right">${data.stock}</td>
+                        <td class="text-right">${formatCurrency(data.value)}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h4 class="text-lg font-bold mb-2">Produk dengan Stok Menipis (≤ 5)</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full bordered-table">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="text-left">Kode</th>
+                                    <th class="text-left">Nama Produk</th>
+                                    <th class="text-left">Kategori</th>
+                                    <th class="text-right">Stok</th>
+                                    <th class="text-right">Harga Modal</th>
+                                    <th class="text-right">Harga Jual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Add low stock product rows
+            if (lowStockProducts.length > 0) {
+                lowStockProducts.forEach(product => {
+                    content += `
+                        <tr class="${product.stock <= 0 ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20'}">
+                            <td>${product.code}</td>
+                            <td>${product.name}</td>
+                            <td>${product.category}</td>
+                            <td class="text-right">${product.stock}</td>
+                            <td class="text-right">${formatCurrency(product.cost)}</td>
+                            <td class="text-right">${formatCurrency(product.price)}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                content += `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">Tidak ada produk dengan stok menipis</td>
+                    </tr>
+                `;
+            }
+            
+            content += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            reportContent.innerHTML = content;
+            
+            // Create pie chart
+            const chartLabels = Object.keys(categorySummary);
+            const chartData = Object.values(categorySummary).map(data => data.value);
+            createPieChart(chartContainer, 'Nilai Inventory per Kategori', chartLabels, chartData);
+        }
+        
+        // Group Transactions by Period
+        function groupTransactionsByPeriod(transactions, period) {
+            const groupedData = {};
+            
+            transactions.forEach(transaction => {
+                const date = new Date(transaction.date);
+                let periodLabel;
+                
+                switch (period) {
+                    case 'daily':
+                        periodLabel = formatDate(date);
+                        break;
+                    case 'weekly':
+                        // Get week number and year
+                        const weekNumber = getWeekNumber(date);
+                        periodLabel = `Minggu ${weekNumber}, ${date.getFullYear()}`;
+                        break;
+                    case 'monthly':
+                        // Format as month and year
+                        periodLabel = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                        break;
+                }
+                
+                if (!groupedData[periodLabel]) {
+                    groupedData[periodLabel] = [];
+                }
+                
+                groupedData[periodLabel].push(transaction);
+            });
+            
+            return groupedData;
+        }
+        
+        // Group Payroll by Period
+        function groupPayrollByPeriod(payrollData, period) {
+            const groupedData = {};
+            
+            payrollData.forEach(payroll => {
+                const date = new Date(payroll.date);
+                let periodLabel;
+                
+                switch (period) {
+                    case 'daily':
+                        periodLabel = formatDate(date);
+                        break;
+                    case 'weekly':
+                        // Get week number and year
+                        const weekNumber = getWeekNumber(date);
+                        periodLabel = `Minggu ${weekNumber}, ${date.getFullYear()}`;
+                        break;
+                    case 'monthly':
+                        // Format as month and year
+                        periodLabel = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                        break;
+                }
+                
+                if (!groupedData[periodLabel]) {
+                    groupedData[periodLabel] = [];
+                }
+                
+                groupedData[periodLabel].push(payroll);
+            });
+            
+            return groupedData;
+        }
+        
+        // Get Week Number
+        function getWeekNumber(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        // Create Chart
+        function createChart(container, label, labels, data) {
+            // Clear previous chart
+            container.innerHTML = '<canvas></canvas>';
+            const canvas = container.querySelector('canvas');
+            
+            // Create new chart
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: 'rgba(93, 92, 222, 0.5)',
+                        borderColor: 'rgba(93, 92, 222, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create Multi-Data Chart
+        function createMultiDataChart(container, labels, datasets) {
+            // Clear previous chart
+            container.innerHTML = '<canvas></canvas>';
+            const canvas = container.querySelector('canvas');
+            
+            // Create new chart
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create Pie Chart
+        function createPieChart(container, label, labels, data) {
+            // Clear previous chart
+            container.innerHTML = '<canvas></canvas>';
+            const canvas = container.querySelector('canvas');
+            
+            // Generate colors
+            const colors = generateColors(labels.length);
+            
+            // Create new chart
+            new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: colors.background,
+                        borderColor: colors.border,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        // Generate colors for charts
+        function generateColors(count) {
+            const backgroundColors = [];
+            const borderColors = [];
+            
+            const hueStep = 360 / count;
+            
+            for (let i = 0; i < count; i++) {
+                const hue = i * hueStep;
+                backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.5)`);
+                borderColors.push(`hsla(${hue}, 70%, 50%, 1)`);
+            }
+            
+            return {
+                background: backgroundColors,
+                border: borderColors
+            };
+        }
+        
+        // Employees Section
+        function setupEmployees() {
+            const addEmployeeBtn = document.getElementById('addEmployeeBtn');
+            const employeeForm = document.getElementById('employeeForm');
+            const closeEmployeeBtn = document.getElementById('closeEmployeeBtn');
+            const processPayrollBtn = document.getElementById('processPayrollBtn');
+            const closePayrollDetailBtn = document.getElementById('closePayrollDetailBtn');
+            const printPayrollDetailBtn = document.getElementById('printPayrollDetailBtn');
+            
+            // Add employee button
+            addEmployeeBtn.addEventListener('click', function() {
+                // Reset form
+                employeeForm.reset();
+                document.getElementById('employeeId').value = '';
+                document.getElementById('employeeModalTitle').textContent = 'Tambah Karyawan';
+                
+                // Show modal
+                document.getElementById('employeeModal').classList.remove('hidden');
+            });
+            
+            // Close employee modal
+            closeEmployeeBtn.addEventListener('click', function() {
+                document.getElementById('employeeModal').classList.add('hidden');
+            });
+            
+            // Submit employee form
+            employeeForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const employeeId = document.getElementById('employeeId').value;
+                const name = document.getElementById('employeeName').value;
+                const position = document.getElementById('employeePosition').value;
+                const salary = parseFloat(document.getElementById('employeeSalary').value);
+                
+                if (employeeId) {
+                    // Update existing employee
+                    const index = appData.employees.findIndex(e => e.id == employeeId);
+                    if (index !== -1) {
+                        appData.employees[index] = {
+                            id: parseInt(employeeId),
+                            name,
+                            position,
+                            salary,
+                            paymentStatus: appData.employees[index].paymentStatus
+                        };
+                    }
+                } else {
+                    // Add new employee
+                    appData.employees.push({
+                        id: generateID(appData.employees),
+                        name,
+                        position,
+                        salary,
+                        paymentStatus: 'pending'
+                    });
+                }
+                
+                // Close modal
+                document.getElementById('employeeModal').classList.add('hidden');
+                
+                // Refresh employees
+                loadEmployees();
+            });
+            
+            // Process payroll button
+            processPayrollBtn.addEventListener('click', function() {
+                const period = document.getElementById('payrollPeriod').value;
+                const date = document.getElementById('payrollDate').value;
+                
+                if (!date) {
+                    alert('Silakan pilih tanggal gajian.');
+                    return;
+                }
+                
+                // Check if all employees are pending payment
+                const pendingEmployees = appData.employees.filter(e => e.paymentStatus === 'pending');
+                if (pendingEmployees.length === 0) {
+                    alert('Tidak ada karyawan yang belum dibayar.');
+                    return;
+                }
+                
+                // Calculate total payroll
+                const totalAmount = pendingEmployees.reduce((sum, e) => sum + e.salary, 0);
+                
+                // Create payroll record
+                const payroll = {
+                    id: generateID(appData.payrollHistory),
+                    date: new Date(date),
+                    period,
+                    totalAmount,
+                    employeeCount: pendingEmployees.length,
+                    employees: pendingEmployees.map(e => ({
+                        id: e.id,
+                        name: e.name,
+                        position: e.position,
+                        salary: e.salary
+                    }))
+                };
+                
+                // Add to payroll history
+                appData.payrollHistory.push(payroll);
+                
+                // Update employee payment status
+                pendingEmployees.forEach(e => {
+                    const employee = appData.employees.find(emp => emp.id === e.id);
+                    if (employee) {
+                        employee.paymentStatus = 'paid';
+                    }
+                });
+                
+                // Refresh data
+                loadEmployees();
+                loadPayrollHistory();
+                
+                alert('Penggajian berhasil diproses.');
+            });
+            
+            // Close payroll detail modal
+            closePayrollDetailBtn.addEventListener('click', function() {
+                document.getElementById('payrollDetailModal').classList.add('hidden');
+            });
+            
+            // Print payroll detail
+            printPayrollDetailBtn.addEventListener('click', function() {
+                window.print();
+            });
+        }
+        
+        // Load Employees
+        function loadEmployees() {
+            const tableBody = document.getElementById('employeeTableBody');
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Add employees to table
+            appData.employees.forEach(employee => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td class="py-2">EMP-${employee.id.toString().padStart(3, '0')}</td>
+                    <td class="py-2">${employee.name}</td>
+                    <td class="py-2">${employee.position}</td>
+                    <td class="py-2 text-right">${formatCurrency(employee.salary)}</td>
+                    <td class="py-2 text-center">
+                        <span class="px-2 py-1 rounded-full text-xs ${employee.paymentStatus === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}">
+                            ${employee.paymentStatus === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
+                        </span>
+                    </td>
+                    <td class="py-2 text-center">
+                        <div class="flex justify-center space-x-1">
+                            <button class="edit-employee bg-primary hover:bg-secondary text-white py-1 px-2 rounded-lg text-sm">
+                                Edit
+                            </button>
+                            <button class="reset-payment ${employee.paymentStatus === 'pending' ? 'hidden' : ''} bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-lg text-sm">
+                                Reset
+                            </button>
+                            <button class="delete-employee bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded-lg text-sm">
+                                Hapus
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                
+                // Edit employee event
+                const editButton = row.querySelector('.edit-employee');
+                editButton.addEventListener('click', function() {
+                    // Fill form with employee data
+                    document.getElementById('employeeId').value = employee.id;
+                    document.getElementById('employeeName').value = employee.name;
+                    document.getElementById('employeePosition').value = employee.position;
+                    document.getElementById('employeeSalary').value = employee.salary;
+                    
+                    // Update modal title
+                    document.getElementById('employeeModalTitle').textContent = 'Edit Karyawan';
+                    
+                    // Show modal
+                    document.getElementById('employeeModal').classList.remove('hidden');
+                });
+                
+                // Reset payment status
+                const resetButton = row.querySelector('.reset-payment');
+                resetButton.addEventListener('click', function() {
+                    if (confirm(`Apakah Anda yakin ingin mereset status pembayaran untuk ${employee.name}?`)) {
+                        employee.paymentStatus = 'pending';
+                        loadEmployees();
+                    }
+                });
+                
+                // Delete employee event
+                const deleteButton = row.querySelector('.delete-employee');
+                deleteButton.addEventListener('click', function() {
+                    if (confirm(`Apakah Anda yakin ingin menghapus karyawan ${employee.name}?`)) {
+                        const index = appData.employees.findIndex(e => e.id === employee.id);
+                        if (index !== -1) {
+                            appData.employees.splice(index, 1);
+                            loadEmployees();
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Load Payroll History
+        function loadPayrollHistory() {
+            const tableBody = document.getElementById('payrollHistoryTableBody');
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Sort payroll history by date (newest first)
+            const sortedPayroll = [...appData.payrollHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Add payroll history to table
+            if (sortedPayroll.length > 0) {
+                sortedPayroll.forEach(payroll => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td class="py-2">${formatDate(payroll.date)}</td>
+                        <td class="py-2">${payroll.period === 'weekly' ? 'Mingguan' : 'Bulanan'}</td>
+                        <td class="py-2 text-right">${formatCurrency(payroll.totalAmount)}</td>
+                        <td class="py-2 text-right">${payroll.employeeCount}</td>
+                        <td class="py-2 text-center">
+                            <button class="view-payroll bg-primary hover:bg-secondary text-white py-1 px-3 rounded-lg text-sm">
+                                Detail
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                    
+                    // View payroll detail event
+                    const viewButton = row.querySelector('.view-payroll');
+                    viewButton.addEventListener('click', function() {
+                        showPayrollDetail(payroll);
+                    });
+                });
+            } else {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-4 text-center">Belum ada riwayat penggajian</td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Show Payroll Detail
+        function showPayrollDetail(payroll) {
+            const detailContent = document.getElementById('payrollDetailContent');
+            
+            // Format date
+            const payrollDate = formatDate(payroll.date);
+            
+            // Create content
+            let content = `
+                <div id="printArea">
+                    <h3 class="text-lg font-bold mb-2">Detail Penggajian</h3>
+                    <div class="mb-4">
+                        <p><strong>Tanggal:</strong> ${payrollDate}</p>
+                        <p><strong>Periode:</strong> ${payroll.period === 'weekly' ? 'Mingguan' : 'Bulanan'}</p>
+                        <p><strong>Total Gaji:</strong> ${formatCurrency(payroll.totalAmount)}</p>
+                        <p><strong>Jumlah Karyawan:</strong> ${payroll.employeeCount}</p>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Daftar Karyawan</h4>
+                    <table class="w-full bordered-table">
+                        <thead class="bg-gray-100 dark:bg-gray-700">
+                            <tr>
+                                <th class="text-left">ID</th>
+                                <th class="text-left">Nama</th>
+                                <th class="text-left">Posisi</th>
+                                <th class="text-right">Gaji</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Add employee rows
+            payroll.employees.forEach(employee => {
+                content += `
+                    <tr>
+                        <td class="py-2">EMP-${employee.id.toString().padStart(3, '0')}</td>
+                        <td class="py-2">${employee.name}</td>
+                        <td class="py-2">${employee.position}</td>
+                        <td class="py-2 text-right">${formatCurrency(employee.salary)}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                        <tfoot class="font-bold">
+                            <tr>
+                                <td colspan="3" class="text-right">Total:</td>
+                                <td class="text-right">${formatCurrency(payroll.totalAmount)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+            
+            detailContent.innerHTML = content;
+            
+            // Show modal
+            document.getElementById('payrollDetailModal').classList.remove('hidden');
+        }
+        
+        // Settings
+        function setupSettings() {
+            const settingsBtn = document.getElementById('settingsBtn');
+            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+            const settingsForm = document.getElementById('settingsForm');
+            const storeLogoBtn = document.getElementById('storeLogoBtn');
+            const storeLogoInput = document.getElementById('storeLogoInput');
+            
+            // Show settings modal
+            settingsBtn.addEventListener('click', function() {
+                // Fill form with store data
+                document.getElementById('storeNameInput').value = appData.store.name;
+                document.getElementById('storeAddressInput').value = appData.store.address;
+                
+                // Show logo preview
+                const storeLogoPreview = document.getElementById('storeLogoPreview');
+                storeLogoPreview.src = appData.store.logo;
+                storeLogoPreview.classList.remove('hidden');
+                
+                // Show modal
+                document.getElementById('settingsModal').classList.remove('hidden');
+            });
+            
+            // Close settings modal
+            closeSettingsBtn.addEventListener('click', function() {
+                document.getElementById('settingsModal').classList.add('hidden');
+            });
+            
+            // Logo upload button
+            storeLogoBtn.addEventListener('click', function() {
+                storeLogoInput.click();
+            });
+            
+            // Logo input change
+            storeLogoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const storeLogoPreview = document.getElementById('storeLogoPreview');
+                        storeLogoPreview.src = e.target.result;
+                        storeLogoPreview.classList.remove('hidden');
+                        
+                        document.getElementById('storeLogoName').textContent = file.name;
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Submit settings form
+            settingsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Update store data
+                appData.store.name = document.getElementById('storeNameInput').value;
+                appData.store.address = document.getElementById('storeAddressInput').value;
+                
+                // Update logo if changed
+                const storeLogoPreview = document.getElementById('storeLogoPreview');
+                if (!storeLogoPreview.classList.contains('hidden')) {
+                    appData.store.logo = storeLogoPreview.src;
+                }
+                
+                // Update store info
+                updateStoreInfo();
+                
+                // Close modal
+                document.getElementById('settingsModal').classList.add('hidden');
+                
+                // Show success message
+                alert('Pengaturan toko berhasil disimpan.');
+            });
+        }
+    </script>
+</body>
+</html>
